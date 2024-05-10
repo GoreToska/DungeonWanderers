@@ -11,6 +11,7 @@ public class CharacterMovement : MonoBehaviour
 
 	[Inject] private InputHandler _inputHandler;
 
+	private bool _canMove = true;
 	private CharacterController _characterController;
 	private Vector2 _lerpedInput;
 	private Vector3 _movementVector;
@@ -25,6 +26,14 @@ public class CharacterMovement : MonoBehaviour
 
 	private void Update()
 	{
+		if(!_canMove)
+		{
+			_lerpedInput = Vector2.zero;
+			_movementVector = Vector3.zero;
+
+			return;
+		}
+
 		_lerpedInput = Vector2.Lerp(_lerpedInput, GetRelativeInput(_movementInput), _movementConfiguration.MovementLerp * Time.deltaTime);
 		_movementVector = new Vector3(_lerpedInput.x, 0, _lerpedInput.y);
 
@@ -35,13 +44,11 @@ public class CharacterMovement : MonoBehaviour
 	private void OnEnable()
 	{
 		_inputHandler.MovementAction += OnMove;
-		_inputHandler.AttackAction += OnAttack;
 	}
 
 	private void OnDisable()
 	{
 		_inputHandler.MovementAction -= OnMove;
-		_inputHandler.AttackAction -= OnAttack;
 	}
 
 	private void HandleMovement()
@@ -80,9 +87,14 @@ public class CharacterMovement : MonoBehaviour
 		return new Vector2(moveDirection.normalized.x, moveDirection.normalized.z);
 	}
 
-	private void OnAttack()
+	public void StopMovement()
 	{
-		Debug.Log("Attack!");
+		_canMove = false;
+	}
+
+	public void StartMovement()
+	{
+		_canMove = true;
 	}
 
 	public float MovementSpeed
